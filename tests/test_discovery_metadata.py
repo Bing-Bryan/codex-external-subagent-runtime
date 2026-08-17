@@ -5,7 +5,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SKILL = ROOT / "codex-external-subagent-bridge"
-SHIM = ROOT / "gpt-subagent-external-router"
 
 
 class DiscoveryMetadataTest(unittest.TestCase):
@@ -15,10 +14,6 @@ class DiscoveryMetadataTest(unittest.TestCase):
         self.assertIn("name: codex-external-subagent-bridge", skill)
         self.assertIn("当用户明确要求", skill)
         self.assertIn("Use this Codex Desktop-only", skill)
-        self.assertIn("allow_implicit_invocation: false", metadata)
-
-    def test_compatibility_shim_is_explicit_only(self):
-        metadata = (SHIM / "agents" / "openai.yaml").read_text(encoding="utf-8")
         self.assertIn("allow_implicit_invocation: false", metadata)
 
     def test_dynamic_discovery_matrix_has_all_case_kinds(self):
