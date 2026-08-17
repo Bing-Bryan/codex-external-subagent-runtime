@@ -1,0 +1,72 @@
+CODEX EXTERNAL SUBAGENT BRIDGE :: TUI FLOW (ENGLISH)
+SCOPE  One post-install task launch | No installation flow | No runtime routing
+
+┌─ VIEW A / USER LAUNCH JOURNEY ───────────────────────────────────────────
+│
+│  PRECONDITION (NOT PART OF THE JOURNEY)
+│  Skill installed | pinned entry project-bound | providers user-configured
+│
+│  [A] User opens the project's pinned entry
+│      The page shows only: 入口已就绪
+│                         │
+│                         ▼
+│  [B] User sends the exact text: 新建
+│      Any other input returns only: 只接受「新建」
+│                         │
+│                         ▼
+│  [C] Bridge validates automatically
+│      User supplies no projectId, cwd, provider, or model
+│                         │
+│              ┌──────────┴──────────┐
+│              │                     │
+│             PASS                  FAIL
+│              │                     └─> Short error; no config change/retry
+│              ▼
+│  [D] Desktop creates and opens the new task
+│      Multi-Agent V1 | GPT-5.6 Sol / Ultra | project binding verified
+│                         │
+│                         ▼
+│  [E] User enters the real request in the new task
+│
+└─ ARRIVAL: user faces Sol Ultra; Luna never processed the real request
+
+┌─ VIEW B / SKILL OPERATION LOGIC (ONE EXACT 新建) ────────────────────────
+│
+│  [1] Deterministic entry gate
+│      trim(input) == 新建; projectId + canonical cwd are entry-bound
+│                         │
+│                         ▼
+│  [2] Scope and safety preflight
+│      READ  project allowlist, global V1 flags, CLI version, model/list
+│      GUARD exact projectId/cwd binding, global lock, per-phase timeouts
+│                         │
+│                         ▼
+│  [3] Provider route gate (read-only)
+│      Read existing named-agent / MCP metadata, registry, smoke evidence
+│      enabled + smoke passed + fingerprint match -> sanitized allowlist
+│      Reject a failed route; no repair, switching, or silent fallback
+│                         │
+│                         ▼  fixed developerInstructions
+│  [4] App Server / zero bootstrap turns
+│      initialize -> model/list
+│      -> thread/start(gpt-5.6-luna, V1, allowlist)
+│      -> thread/settings/update(gpt-5.6-sol, ultra)
+│      -> thread/read(includeTurns=true)
+│      Invariants: turn/start = 0 | bootstrapTurns = 0 | fallback = false
+│                         │
+│                         ▼
+│  [5] Desktop completion
+│      Set title -> locate threadId -> verify projectId/cwd -> navigate
+│
+└─ OUTPUT: one project-bound V1 task owned by GPT-5.6 Sol / Ultra
+
+┌─ WHAT DOES A NORMAL LAUNCH CHANGE? ──────────────────────────────────────
+│  READ ONLY  config.toml, agents/*.toml, MCP metadata, registry/evidence
+│  CREATE     one persistent Codex task
+│  UPDATE     task model/effort, sanitized instructions, title/navigation
+│  TEMP       launch.lock, removed on exit
+│  NEVER      global config, Agent TOML, MCP, Keychain, CC Switch, secrets
+│
+│  Install/sync only places Skill files; it is outside one 新建 operation.
+│  Smoke recording and explicit config apply are separate; launch calls none.
+└─────────────────────────────────────────────────────────────────────────

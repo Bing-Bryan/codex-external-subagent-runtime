@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "providers": [
+    {
+      "providerId": "my-direct-child",
+      "label": "My existing direct Responses child",
+      "transport": "responses-direct",
+      "enabled": false,
+      "agentType": "replace_with_existing_agent_type",
+      "notes": "Define the provider in an existing named-agent TOML, then run a local V1 child smoke test before enabling this route."
+    },
+    {
+      "providerId": "my-dedicated-adapter-child",
+      "label": "My existing dedicated Responses adapter child",
+      "transport": "responses-adapter-dedicated",
+      "enabled": false,
+      "agentType": "replace_with_existing_adapter_agent_type",
+      "notes": "Use one immutable provider and endpoint per adapter. A shared mutable proxy is not a deterministic concurrent route."
+    },
+    {
+      "providerId": "my-read-only-tool",
+      "label": "My existing bounded MCP tool",
+      "transport": "mcp-tool",
+      "enabled": false,
+      "mcpServer": "replace_with_existing_mcp_server",
+      "toolName": "replace_with_bounded_tool_name",
+      "readOnly": true,
+      "notes": "A CLI or SDK belongs behind a bounded MCP tool and is not represented as a model child."
+    }
+  ]
+}

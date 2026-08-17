@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex External Subagent Bridge"
+  short_description: "Launch a project-bound V1 Sol task with gated external routes"
+  default_prompt: "Use only in a configured Codex Desktop pinned entry. Enforce exact 新建 through the deterministic helper, create a zero-bootstrap-turn V1 thread as GPT-5.6 Luna, switch it to GPT-5.6 Sol Ultra, verify Desktop project binding, and expose only enabled locally smoke-tested fingerprint-matching routes. Never modify provider or global configuration."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "agents/my_vendor_worker.toml",
+      "content": "name = \"my_vendor_worker\"\ndescription = \"Bounded external worker configured by this operator.\"\nmodel = \"replace-with-provider-model\"\nmodel_provider = \"my_vendor\"\nsandbox_mode = \"read-only\"\n\n[model_providers.my_vendor]\nname = \"My vendor\"\nbase_url = \"https://replace-with-provider-endpoint.example/v1\"\nwire_api = \"responses\"\n"
+    }
+  ]
+}
