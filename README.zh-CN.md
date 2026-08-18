@@ -77,6 +77,10 @@ thread/read(includeTurns=true)
 * App Server 请求固定 V1 feature set：先以 `gpt-5.6-luna` 启动任务，再对同一
   任务执行 `gpt-5.6-sol` + `ultra` 切换，并复核最终设置。本仓库没有 V2 专用的
   start、update、read 适配器。
+* 对跨 Provider 场景，当前 V2 契约本质上是面向 OpenAI 自家模型栈封闭定制的
+  高级协议，不能提供本 Runtime 所需的 child task 语义。GPT 主控与 Kimi、MiniMax
+  等外部模型混用时必须使用 V1；在 V2 下运行这类组合，当前表现通常是反复收到
+  HTTP 400，或创建出的子 Agent 收到空任务。
 * 零 bootstrap turn、精确项目绑定、路线 allowlist 注入和禁止 fallback，全部是
   按 V1 顺序验证的结果。V1 证据不能直接当作 V2 生命周期或路线契约的证据。
 * 支持 V2 需要单独实现、单独做 Desktop 验收。在此之前，V2 开启的环境会安全停止，
