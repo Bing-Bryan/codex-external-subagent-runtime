@@ -94,6 +94,82 @@ thread/read(includeTurns=true)
 * 支持 V2 需要单独实现、单独做 Desktop 验收。在此之前，V2 开启的环境会安全停止，
   不创建语义未经验证的任务。
 
+## 架构 / 终端流程
+
+```text
+CODEX EXTERNAL SUBAGENT RUNTIME :: TUI 流程图（简体中文）
+范围  已部署后的单次新任务启动 | 不展示安装部署 | 不展开任务运行时路由
+
+┌─ VIEW A / 用户启动旅程（用户可见）─────────────────────────────────────
+│
+│  前置状态（不属于旅程）
+│  Runtime 已安装 | 置顶入口已绑定项目 | Provider 由用户自行配置
+│
+│  [A] 用户进入项目的置顶入口
+│       页面仅显示 ENTRY_READY
+│                         │
+│                         ▼
+│  [B] 用户发送精确小写 new
+│       其他输入只返回：ONLY_ACCEPTS_NEW
+│                         │
+│                         ▼
+│  [C] Runtime 自动校验
+│       用户无需填写 projectId、cwd、Provider 或模型
+│                         │
+│              ┌──────────┴──────────┐
+│              │                     │
+│            通过                  失败
+│              │                     └─> 返回短错误；不改配置、不自动重试
+│              ▼
+│  [D] Desktop 创建并打开新任务
+│       Multi-Agent V1 | GPT-5.6 Sol / Ultra | 项目绑定已复核
+│                         │
+│                         ▼
+│  [E] 用户在新任务中输入真实需求
+│
+└─ 到达状态：用户面对 Sol Ultra；Luna 没有处理真实需求
+
+┌─ VIEW B / Runtime 内部操作逻辑（一次精确 new）────────────────────────────
+│
+│  [1] 确定性入口门
+│      trim(input) == "new"；projectId + canonical cwd 由入口固定
+│                         │
+│                         ▼
+│  [2] 范围与安全预检
+│      READ  项目白名单、全局 V1 flags、Codex App CLI 版本、model/list
+│      GUARD projectId/cwd 精确绑定、全局启动锁、分阶段超时
+│                         │
+│                         ▼
+│  [3] Provider 路线门禁（只读）
+│      读取已有 named-agent / MCP 元数据、registry、smoke evidence
+│      enabled + smoke passed + fingerprint match -> 脱敏 allowlist
+│      单路线失败只会被拒绝；不修复、不切换、不 silent fallback
+│                         │  固定 developerInstructions
+│  [4] App Server / 零 bootstrap turn
+│      initialize -> model/list
+│      -> thread/start(gpt-5.6-luna, V1, allowlist)
+│      -> thread/settings/update(gpt-5.6-sol, ultra)
+│      -> thread/read(includeTurns=true)
+│      不变量：turn/start = 0 | bootstrapTurns = 0 | fallback = false
+│                         │
+│                         ▼
+│  [5] Desktop 收尾
+│      设置标题 -> 定位 threadId -> 复核 projectId/cwd -> 导航
+│
+└─ 输出：一个已绑定项目、由 GPT-5.6 Sol / Ultra 承接的新 V1 任务
+
+┌─ 正常启动到底改变什么？────────────────────────────────────────────────
+│  READ ONLY  config.toml、agents/*.toml、MCP 元数据、registry/evidence
+│  CREATE     一个持久化 Codex 任务
+│  UPDATE     该任务的模型/effort、脱敏 instructions、标题与导航状态
+│  TEMP       launch.lock；退出时删除
+│  NEVER      不改全局配置、Agent TOML、MCP、Keychain、CC Switch、凭据
+│
+│  安装仅放置 Runtime 文件；不属于上面的一次 new 流程。
+│  smoke recorder 与显式 config apply 是独立操作，launch 永不调用它们。
+└─────────────────────────────────────────────────────────────────────────
+```
+
 ## 路由契约
 
 启用前阅读 [`docs/provider-routing.md`](docs/provider-routing.md)。路线只有在以下
@@ -124,8 +200,6 @@ recording 永远不会调用它，测试使用临时 `CODEX_HOME`。
 
 ## 文档
 
-* [`docs/architecture.en.txt`](docs/architecture.en.txt) — 英文终端流程。
-* [`docs/architecture.zh-CN.txt`](docs/architecture.zh-CN.txt) — 中文终端流程。
 * [`docs/provider-routing.md`](docs/provider-routing.md) — 路线与证据边界。
 * [`MIGRATION.md`](MIGRATION.md) — 从原 monorepo 拆出的迁移说明。
 
