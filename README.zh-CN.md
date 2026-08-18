@@ -2,6 +2,10 @@
 
 [English](README.md)
 
+让 GPT 与 Kimi、DeepSeek 等外部模型在同一个 Codex 任务中作为受控子 Agent
+协作，不依赖原生 V2 的跨 Provider child support。Grok Build/CLI 等集成同样受
+路线门禁约束；未完成模型子任务验收前，按受限工具处理。
+
 这是一个面向 Codex Desktop 的 Bootstrap、Launcher 和 Runtime Route
 Contract 独立仓库。
 
