@@ -88,6 +88,12 @@ launch and verification chain has been implemented and tested only for V1:
   `gpt-5.6-luna`, switches that same task to `gpt-5.6-sol` with `ultra`, and
   verifies the resulting settings. There is no V2-specific start, update, or
   read adapter in this repository.
+* For cross-provider work, the current V2 contract behaves like a closed,
+  OpenAI-model-oriented advanced protocol. It does not expose the child-task
+  semantics this runtime needs for a GPT controller combined with Kimi,
+  MiniMax, or another external model. That combination must stay on V1; under
+  V2 it is expected to produce repeated HTTP 400 failures or a child task with
+  empty work.
 * Zero bootstrap turns, exact project binding, route-allowlist injection, and
   no-fallback behavior are all checked against this V1 sequence. V1 evidence
   cannot be reused as evidence for a V2 lifecycle or route contract.
