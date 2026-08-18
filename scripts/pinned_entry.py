@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic pinned-entry gate for the exact Chinese launch phrase."""
+"""Deterministic pinned-entry gate for the exact lowercase ``new`` command."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ from pathlib import Path
 import sys
 
 
-READY = "入口已就绪"
-LAUNCH_PHRASE = "新建"
-REJECTED = "只接受「新建」"
+READY = "ENTRY_READY"
+LAUNCH_PHRASE = "new"
+REJECTED = "ONLY_ACCEPTS_NEW"
 
 
 def parse_args() -> argparse.Namespace:

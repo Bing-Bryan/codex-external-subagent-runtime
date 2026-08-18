@@ -7,11 +7,11 @@ SCOPE  One post-install task launch | No installation flow | No runtime routing
 │  Skill installed | pinned entry project-bound | providers user-configured
 │
 │  [A] User opens the project's pinned entry
-│      The page shows only: 入口已就绪
+│      The page shows only: ENTRY_READY
 │                         │
 │                         ▼
-│  [B] User sends the exact text: 新建
-│      Any other input returns only: 只接受「新建」
+│  [B] User sends the exact lowercase text: new
+│      Any other input returns only: ONLY_ACCEPTS_NEW
 │                         │
 │                         ▼
 │  [C] Bridge validates automatically
@@ -30,10 +30,10 @@ SCOPE  One post-install task launch | No installation flow | No runtime routing
 │
 └─ ARRIVAL: user faces Sol Ultra; Luna never processed the real request
 
-┌─ VIEW B / SKILL OPERATION LOGIC (ONE EXACT 新建) ────────────────────────
+┌─ VIEW B / SKILL OPERATION LOGIC (ONE EXACT new) ─────────────────────────
 │
 │  [1] Deterministic entry gate
-│      trim(input) == 新建; projectId + canonical cwd are entry-bound
+│      trim(input) == "new"; projectId + canonical cwd are entry-bound
 │                         │
 │                         ▼
 │  [2] Scope and safety preflight
@@ -67,6 +67,6 @@ SCOPE  One post-install task launch | No installation flow | No runtime routing
 │  TEMP       launch.lock, removed on exit
 │  NEVER      global config, Agent TOML, MCP, Keychain, CC Switch, secrets
 │
-│  Install/sync only places Skill files; it is outside one 新建 operation.
+│  Install/sync only places Skill files; it is outside one new operation.
 │  Smoke recording and explicit config apply are separate; launch calls none.
 └─────────────────────────────────────────────────────────────────────────

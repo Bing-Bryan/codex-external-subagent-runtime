@@ -8,12 +8,22 @@ SKILL = ROOT / "codex-external-subagent-bridge"
 
 
 class DiscoveryMetadataTest(unittest.TestCase):
-    def test_canonical_metadata_is_bilingual_and_explicit_only(self):
+    def test_canonical_metadata_is_english_and_explicit_only(self):
         skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
         metadata = (SKILL / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        frontmatter = skill.split("---", 2)[1]
+        description = frontmatter.split("description: >-\n", 1)[1]
+        normalized_description = " ".join(description.split())
         self.assertIn("name: codex-external-subagent-bridge", skill)
-        self.assertIn("当用户明确要求", skill)
-        self.assertIn("Use this Codex Desktop-only", skill)
+        self.assertNotRegex(description, r"[\u3400-\u9fff]")
+        for phrase in (
+            "exact lowercase command `new`",
+            "GPT-5.6 Luna",
+            "GPT-5.6 Sol Ultra",
+            "locally smoke-tested",
+            "Do not use",
+        ):
+            self.assertIn(phrase, normalized_description)
         self.assertIn("allow_implicit_invocation: false", metadata)
 
     def test_v2_boundary_is_explicit(self):

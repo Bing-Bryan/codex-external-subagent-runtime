@@ -1,13 +1,15 @@
 ---
 name: codex-external-subagent-bridge
 description: >-
-  Use this Codex Desktop-only launcher and route-contract bridge when an
-  approved project needs a fresh Multi-Agent V1 task that starts with GPT-5.6
-  Luna, switches without a bootstrap turn to GPT-5.6 Sol Ultra, and exposes
-  only locally smoke-tested external child or MCP routes. 当用户明确要求在 Codex
-  Desktop 的项目置顶入口中输入精确“新建”，创建 V1 Sol Ultra 任务，并只使用本机已配置、
-  已冒烟且配置指纹一致的外部子 Agent 或只读 MCP 工具时使用。不要用于普通对话、通用
-  Agent、凭据配置、自动修复配置或未验证的 Provider 声明。
+  Use this Codex Desktop-only launcher and route-contract bridge only from a
+  configured project-pinned entry when the user sends the exact lowercase
+  command `new` to create a fresh Multi-Agent V1 task. The task starts with
+  GPT-5.6 Luna, switches without a bootstrap turn to GPT-5.6 Sol Ultra, and
+  exposes only existing external child or read-only MCP routes that are
+  enabled, locally smoke-tested, and fingerprint-matching. Do not use for
+  ordinary conversations, generic Agent hosts, credential or provider setup,
+  automatic configuration repair, provider installation, or unverified
+  Provider claims.
 ---
 
 # Codex External Subagent Bridge
@@ -25,7 +27,7 @@ launch or route boundaries:
 - English: `references/architecture.en.txt`
 
 Both views show the post-install user launch journey and the internal operation
-triggered by one exact `新建`. They do not depict installation or the new task's
+triggered by one exact lowercase `new` command. They do not depict installation or the new task's
 later runtime routing. Treat optional configuration `apply` as an isolated
 operator action, not part of either view.
 
@@ -69,15 +71,17 @@ route is rejected without fallback or repair.
 Each approved Desktop project uses one pinned launcher task. The entry itself
 must not process the user's real work.
 
-1. On initial setup, output exactly `入口已就绪`.
-2. Accept only a trimmed, exact `新建`.
-3. For every other message, output exactly `只接受「新建」`.
-4. On `新建`, call `scripts/pinned_entry.py` with the entry's fixed
+1. On initial setup, output exactly `ENTRY_READY`.
+2. Accept only a trimmed, exact lowercase `new`.
+3. For every other message, output exactly `ONLY_ACCEPTS_NEW`.
+4. On `new`, call `scripts/pinned_entry.py` with the entry's fixed
    `projectId` and canonical `cwd`. Never ask the user to supply them.
 5. A live global lock returns `already_running`; never retry silently.
 
-The deterministic helper provides `--ready` and `--message`. Do not replace its
-string check with an LLM interpretation.
+The deterministic helper provides `--ready` and `--message`. Only the exact
+trimmed comparison `args.message.strip() == "new"` may pass the entry gate.
+Do not replace this check with an LLM interpretation, synonyms, case variants,
+or a complete sentence.
 
 ## Launch protocol
 

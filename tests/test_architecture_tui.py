@@ -65,9 +65,11 @@ class ArchitectureTuiTest(unittest.TestCase):
         for language, path in ARCHITECTURES.items():
             with self.subTest(language=language):
                 text = path.read_text(encoding="utf-8")
-                self.assertIn("入口已就绪", text)
-                self.assertIn("新建", text)
-                self.assertIn("只接受「新建」", text)
+                self.assertIn("ENTRY_READY", text)
+                self.assertIn("new", text)
+                self.assertIn("ONLY_ACCEPTS_NEW", text)
+                self.assertIn('trim(input) == "new"', text)
+                self.assertNotIn("新建", text)
 
     def test_views_fit_an_eighty_column_terminal(self):
         for language, path in ARCHITECTURES.items():

@@ -3,9 +3,9 @@
   "cases": [
     {
       "kind": "positive",
-      "prompt": "在配置好的 Codex Desktop 项目置顶入口里新建一个 V1 Sol Ultra 任务，并只允许本机冒烟通过的外部路线。",
+      "prompt": "在配置好的 Codex Desktop 项目置顶入口里输入 `new` 创建一个 V1 Sol Ultra 任务，并只允许本机冒烟通过的外部路线。",
       "expected": "invoke",
-      "observed": "invoke conditions are explicit in the bilingual description and Skill body",
+      "observed": "invoke conditions are explicit in the English description and Skill body",
       "rationale": "Exact host, entry, V1 launch, root model, and smoke gate all match."
     },
     {
@@ -31,10 +31,10 @@
     },
     {
       "kind": "ambiguous",
-      "prompt": "新建",
+      "prompt": "new",
       "expected": "do_not_implicitly_invoke",
       "observed": "allow_implicit_invocation is false and the body requires a configured pinned entry",
-      "rationale": "The token alone is insufficient outside the fixed Desktop launcher context."
+      "rationale": "The exact token alone is insufficient outside the fixed Desktop launcher context."
     },
     {
       "kind": "ambiguous",
