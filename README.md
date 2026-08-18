@@ -2,6 +2,11 @@
 
 [简体中文](README.zh-CN.md)
 
+Enable GPT and external models such as Kimi and DeepSeek to collaborate as
+gated subagents in the same Codex task, without requiring native V2
+cross-provider child support. Grok Build/CLI integrations stay behind the same
+route gates and remain tools until model-child delivery is separately verified.
+
 This standalone runtime repository packages a Bootstrap, Launcher, and Runtime
 Route Contract for Codex Desktop.
 
