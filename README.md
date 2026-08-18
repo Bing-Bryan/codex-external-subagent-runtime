@@ -2,9 +2,8 @@
 
 [简体中文](README.zh-CN.md)
 
-Codex Desktop bootstrap, launcher, and runtime route contract for gated
-external subagents. This is a standalone runtime repository, not an Agent
-Skill and not a general-purpose external-model router.
+This standalone runtime repository packages a Bootstrap, Launcher, and Runtime
+Route Contract for Codex Desktop.
 
 The runtime creates a project-bound Multi-Agent V1 task with GPT-5.6 Luna,
 switches the same task to GPT-5.6 Sol Ultra without a bootstrap turn, and
@@ -69,12 +68,32 @@ thread/read(includeTurns=true)
 
 There is no Luna prompt, Sol handoff prompt, or `turn/start`. Success requires
 V1, zero bootstrap turns, Sol/Ultra settings verification, exact project
-binding, and a UUID thread ID. Multi-Agent V2 is outside this runtime contract;
-the runtime fails closed with `global_v1_required` when V2 is enabled.
+binding, and a UUID thread ID. The Multi-Agent V1 boundary is deliberate; see
+the next section for the V2 limitation.
 
 After a successful launch, use Desktop controls to set a distinguishable
 title, locate the returned thread, verify project ID and canonical cwd, and
 navigate only after those checks pass.
+
+## Why this runtime uses Multi-Agent V1
+
+V1 is the compatibility boundary for this implementation because the complete
+launch and verification chain has been implemented and tested only for V1:
+
+* Global preflight requires `[features] multi_agent = true` and
+  `multi_agent_v2 = false`. When V2 is enabled, the runtime stops before the
+  App Server with `global_v1_required`; it does not toggle the global flag or
+  silently fall back.
+* The App Server request pins the V1 feature set, starts the task as
+  `gpt-5.6-luna`, switches that same task to `gpt-5.6-sol` with `ultra`, and
+  verifies the resulting settings. There is no V2-specific start, update, or
+  read adapter in this repository.
+* Zero bootstrap turns, exact project binding, route-allowlist injection, and
+  no-fallback behavior are all checked against this V1 sequence. V1 evidence
+  cannot be reused as evidence for a V2 lifecycle or route contract.
+* Supporting V2 would require a separate implementation and a separate
+  Desktop acceptance track. Until that work exists, a V2-enabled setup stops
+  safely instead of creating a task with unverified semantics.
 
 ## Route contract
 

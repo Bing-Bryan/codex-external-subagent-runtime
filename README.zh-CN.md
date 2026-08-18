@@ -3,7 +3,7 @@
 [English](README.md)
 
 这是一个面向 Codex Desktop 的 Bootstrap、Launcher 和 Runtime Route
-Contract 独立仓库，不是 Agent Skill，也不是通用外部模型路由器。
+Contract 独立仓库。
 
 Runtime 使用 GPT-5.6 Luna 创建项目绑定的 Multi-Agent V1 任务，再在不产生
 bootstrap turn 的情况下切换到 GPT-5.6 Sol Ultra，并且只注入经过本机验证的
@@ -62,10 +62,25 @@ thread/read(includeTurns=true)
 
 不发送 Luna prompt、Sol handoff prompt 或 `turn/start`。成功必须同时满足 V1、
 零 bootstrap turn、Sol/Ultra 设置已验证、项目绑定准确以及 thread ID 为 UUID。
-Multi-Agent V2 不属于本 Runtime 契约；启用 V2 时以 `global_v1_required` 失败关闭。
+这里将 Multi-Agent V1 作为兼容性边界；V2 的限制见下一节。
 
 启动成功后，再使用 Desktop 控件设置标题、定位返回的 thread、复核 project ID
 与 canonical cwd，全部通过后才导航。
+
+## 为什么当前方案基于 Multi-Agent V1
+
+选择 V1 是因为当前实现和测试只覆盖了完整的 V1 启动与验收链路：
+
+* 全局预检要求 `[features] multi_agent = true` 且
+  `multi_agent_v2 = false`。启用 V2 时，Runtime 会在进入 App Server 前以
+  `global_v1_required` 停止，不会切换全局开关，也不会静默降级。
+* App Server 请求固定 V1 feature set：先以 `gpt-5.6-luna` 启动任务，再对同一
+  任务执行 `gpt-5.6-sol` + `ultra` 切换，并复核最终设置。本仓库没有 V2 专用的
+  start、update、read 适配器。
+* 零 bootstrap turn、精确项目绑定、路线 allowlist 注入和禁止 fallback，全部是
+  按 V1 顺序验证的结果。V1 证据不能直接当作 V2 生命周期或路线契约的证据。
+* 支持 V2 需要单独实现、单独做 Desktop 验收。在此之前，V2 开启的环境会安全停止，
+  不创建语义未经验证的任务。
 
 ## 路由契约
 
