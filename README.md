@@ -88,12 +88,18 @@ launch and verification chain has been implemented and tested only for V1:
   `gpt-5.6-luna`, switches that same task to `gpt-5.6-sol` with `ultra`, and
   verifies the resulting settings. There is no V2-specific start, update, or
   read adapter in this repository.
-* For cross-provider work, the current V2 contract behaves like a closed,
-  OpenAI-model-oriented advanced protocol. It does not expose the child-task
-  semantics this runtime needs for a GPT controller combined with Kimi,
-  MiniMax, or another external model. That combination must stay on V1; under
-  V2 it is expected to produce repeated HTTP 400 failures or a child task with
-  empty work.
+* The concrete V2 limitation is an authorization boundary. The current
+  Codex Desktop V2 contract can orchestrate supported OpenAI model roles, but
+  its child-task context, control payloads, and OpenAI-produced artifacts are
+  not reliably authorizable for a third-party provider to consume. A GPT root
+  task therefore cannot safely hand the same V2 child payload to Kimi, MiniMax,
+  or another external model. The observed failure modes are repeated HTTP 400
+  responses or a child task with empty work.
+* V1 is the compatibility path around that boundary: Sol writes an explicit,
+  bounded brief and sends it through an allowlisted Responses route, dedicated
+  adapter, or MCP tool. The external route is not represented as a native V2
+  child. This is why cross-provider delivery stays on V1; it is a protocol
+  compatibility decision, not a general claim that V2 is inferior.
 * Zero bootstrap turns, exact project binding, route-allowlist injection, and
   no-fallback behavior are all checked against this V1 sequence. V1 evidence
   cannot be reused as evidence for a V2 lifecycle or route contract.
