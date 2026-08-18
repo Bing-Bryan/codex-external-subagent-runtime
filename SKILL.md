@@ -111,6 +111,43 @@ Accept launcher success only when the result has:
 - `settingsVerified: true`
 - `projectBinding: desktop_required`
 
+## Why Multi-Agent V2 is not used
+
+This Skill deliberately targets Multi-Agent V1. This is a compatibility and
+verification boundary, not a claim that V2 is universally worse.
+
+The current Codex Desktop/App Server flow has been validated for:
+
+- starting the task with GPT-5.6 Luna;
+- switching the same task to GPT-5.6 Sol Ultra;
+- zero bootstrap turns; and
+- V1 child delivery, provider identity, and project binding.
+
+In an external-provider route, the main Agent (GPT) may be able to start a
+child process, but V2 can package task instructions and context as
+Codex/OpenAI-specific `agent_message` or `encrypted_content`. An external
+Provider may not be able to parse or decrypt that package. The problem is not
+that GPT can never send data; it is that GPT cannot reliably deliver an
+executable task to an external child Agent. A successful process start is not
+proof that the task arrived correctly.
+
+The launcher therefore requires `multi_agent = true` and
+`multi_agent_v2 = false`. If V2 is enabled, it stops with
+`global_v1_required`; it never changes the global configuration or silently
+falls back.
+
+### Current boundary
+
+- The V2-specific child-message and context-transport semantics are not part
+  of this Skill's supported contract.
+- The V1 launch path is limited to Codex Desktop and its bundled App Server,
+  with the fixed Luna-to-Sol Ultra sequence.
+- External routes must use existing local configuration and pass their own
+  smoke test and fingerprint check; this Skill does not provide automatic V2
+  adaptation, provider installation, or fallback.
+- `multi_agent_v2 = false` is a global setting, so it affects other projects
+  using the same Codex configuration as well.
+
 ## Desktop completion
 
 After launcher success, use Desktop task controls without sending a sync turn:

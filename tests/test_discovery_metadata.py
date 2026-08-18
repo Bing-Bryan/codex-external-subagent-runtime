@@ -16,6 +16,15 @@ class DiscoveryMetadataTest(unittest.TestCase):
         self.assertIn("Use this Codex Desktop-only", skill)
         self.assertIn("allow_implicit_invocation: false", metadata)
 
+    def test_v2_boundary_is_explicit(self):
+        skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        normalized = " ".join(skill.split())
+        self.assertIn("GPT cannot reliably deliver an executable task", normalized)
+        self.assertIn("agent_message", normalized)
+        self.assertIn("encrypted_content", normalized)
+        self.assertIn("global_v1_required", normalized)
+        self.assertIn("multi_agent_v2 = false", normalized)
+
     def test_dynamic_discovery_matrix_has_all_case_kinds(self):
         matrix = json.loads(
             Path(__file__).with_name("discovery_prompts.json").read_text(encoding="utf-8")
