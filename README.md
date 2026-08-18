@@ -112,6 +112,82 @@ launch and verification chain has been implemented and tested only for V1:
   Desktop acceptance track. Until that work exists, a V2-enabled setup stops
   safely instead of creating a task with unverified semantics.
 
+## Architecture / terminal flow
+
+```text
+CODEX EXTERNAL SUBAGENT RUNTIME :: TUI FLOW (ENGLISH)
+SCOPE  One post-install task launch | No installation flow | No runtime routing
+
+┌─ VIEW A / USER LAUNCH JOURNEY ───────────────────────────────────────────
+│
+│  PRECONDITION (NOT PART OF THE JOURNEY)
+│  Runtime installed | pinned entry project-bound | providers user-configured
+│
+│  [A] User opens the project's pinned entry
+│      The page shows only: ENTRY_READY
+│                         │
+│                         ▼
+│  [B] User sends the exact lowercase text: new
+│      Any other input returns only: ONLY_ACCEPTS_NEW
+│                         │
+│                         ▼
+│  [C] Runtime validates automatically
+│      User supplies no projectId, cwd, provider, or model
+│                         │
+│              ┌──────────┴──────────┐
+│              │                     │
+│             PASS                  FAIL
+│              │                     └─> Short error; no config change/retry
+│              ▼
+│  [D] Desktop creates and opens the new task
+│      Multi-Agent V1 | GPT-5.6 Sol / Ultra | project binding verified
+│                         │
+│                         ▼
+│  [E] User enters the real request in the new task
+│
+└─ ARRIVAL: user faces Sol Ultra; Luna never processed the real request
+
+┌─ VIEW B / RUNTIME OPERATION LOGIC (ONE EXACT new) ─────────────────────────
+│
+│  [1] Deterministic entry gate
+│      trim(input) == "new"; projectId + canonical cwd are entry-bound
+│                         │
+│                         ▼
+│  [2] Scope and safety preflight
+│      READ  project allowlist, global V1 flags, CLI version, model/list
+│      GUARD exact projectId/cwd binding, global lock, per-phase timeouts
+│                         │
+│                         ▼
+│  [3] Provider route gate (read-only)
+│      Read existing named-agent / MCP metadata, registry, smoke evidence
+│      enabled + smoke passed + fingerprint match -> sanitized allowlist
+│      Reject a failed route; no repair, switching, or silent fallback
+│                         │  fixed developerInstructions
+│  [4] App Server / zero bootstrap turns
+│      initialize -> model/list
+│      -> thread/start(gpt-5.6-luna, V1, allowlist)
+│      -> thread/settings/update(gpt-5.6-sol, ultra)
+│      -> thread/read(includeTurns=true)
+│      Invariants: turn/start = 0 | bootstrapTurns = 0 | fallback = false
+│                         │
+│                         ▼
+│  [5] Desktop completion
+│      Set title -> locate threadId -> verify projectId/cwd -> navigate
+│
+└─ OUTPUT: one project-bound V1 task owned by GPT-5.6 Sol / Ultra
+
+┌─ WHAT DOES A NORMAL LAUNCH CHANGE? ──────────────────────────────────────
+│  READ ONLY  config.toml, agents/*.toml, MCP metadata, registry/evidence
+│  CREATE     one persistent Codex task
+│  UPDATE     task model/effort, sanitized instructions, title/navigation
+│  TEMP       launch.lock, removed on exit
+│  NEVER      global config, Agent TOML, MCP, Keychain, CC Switch, secrets
+│
+│  Installing the runtime is outside one new operation.
+│  Smoke recording and explicit config apply are separate; launch calls none.
+└─────────────────────────────────────────────────────────────────────────
+```
+
 ## Route contract
 
 Read [`docs/provider-routing.md`](docs/provider-routing.md) before enabling a
@@ -144,8 +220,6 @@ recording, and tests use a temporary `CODEX_HOME`.
 
 ## Documentation
 
-* [`docs/architecture.en.txt`](docs/architecture.en.txt) — English terminal flow.
-* [`docs/architecture.zh-CN.txt`](docs/architecture.zh-CN.txt) — Chinese terminal flow.
 * [`docs/provider-routing.md`](docs/provider-routing.md) — route and evidence boundary.
 * [`MIGRATION.md`](MIGRATION.md) — extraction from the former monorepo layout.
 

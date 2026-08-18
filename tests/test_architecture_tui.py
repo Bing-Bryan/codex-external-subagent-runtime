@@ -3,11 +3,19 @@ import unittest
 from pathlib import Path
 
 
+ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURES = {
-    "zh-CN": Path(__file__).resolve().parents[1] / "docs" / "architecture.zh-CN.txt",
-    "en": Path(__file__).resolve().parents[1] / "docs" / "architecture.en.txt",
+    "zh-CN": (ROOT / "README.zh-CN.md", "## 架构 / 终端流程", "## 路由契约"),
+    "en": (ROOT / "README.md", "## Architecture / terminal flow", "## Route contract"),
 }
-README = Path(__file__).resolve().parents[1] / "README.md"
+
+
+def architecture_text(path, start_marker, end_marker):
+    readme = path.read_text(encoding="utf-8")
+    start = readme.index(start_marker) + len(start_marker)
+    end = readme.index(end_marker, start)
+    section = readme[start:end]
+    return section.split("```text\n", 1)[1].split("\n```", 1)[0]
 
 
 def display_width(line):
@@ -20,11 +28,12 @@ def display_width(line):
 
 
 class ArchitectureTuiTest(unittest.TestCase):
-    def test_readme_links_both_terminal_views(self):
-        readme = README.read_text(encoding="utf-8")
-        for path in ARCHITECTURES.values():
-            self.assertIn(f"docs/{path.name}", readme)
-        self.assertIn("standalone runtime repository", readme)
+    def test_readmes_embed_both_terminal_views(self):
+        self.assertIn("standalone runtime repository", ARCHITECTURES["en"][0].read_text(encoding="utf-8"))
+        self.assertIn("独立仓库", ARCHITECTURES["zh-CN"][0].read_text(encoding="utf-8"))
+        for path, start_marker, end_marker in ARCHITECTURES.values():
+            self.assertIn(start_marker, path.read_text(encoding="utf-8"))
+            self.assertIn(end_marker, path.read_text(encoding="utf-8"))
 
     def test_views_have_matching_journey_and_operation_topology(self):
         required = (
@@ -45,26 +54,26 @@ class ArchitectureTuiTest(unittest.TestCase):
             "bootstrapTurns = 0",
             "launch.lock",
         )
-        for language, path in ARCHITECTURES.items():
+        for language, (path, start_marker, end_marker) in ARCHITECTURES.items():
             with self.subTest(language=language):
-                text = path.read_text(encoding="utf-8")
+                text = architecture_text(path, start_marker, end_marker)
                 for marker in required:
                     self.assertIn(marker, text)
                 self.assertEqual(text.count("VIEW A"), 1)
                 self.assertEqual(text.count("VIEW B"), 1)
 
     def test_views_do_not_expand_runtime_route_classes(self):
-        for language, path in ARCHITECTURES.items():
+        for language, (path, start_marker, end_marker) in ARCHITECTURES.items():
             with self.subTest(language=language):
-                text = path.read_text(encoding="utf-8")
+                text = architecture_text(path, start_marker, end_marker)
                 self.assertNotIn("responses-direct", text)
                 self.assertNotIn("responses-adapter-dedicated", text)
                 self.assertNotIn("mcp-tool", text)
 
     def test_views_preserve_literal_entry_contract(self):
-        for language, path in ARCHITECTURES.items():
+        for language, (path, start_marker, end_marker) in ARCHITECTURES.items():
             with self.subTest(language=language):
-                text = path.read_text(encoding="utf-8")
+                text = architecture_text(path, start_marker, end_marker)
                 self.assertIn("ENTRY_READY", text)
                 self.assertIn("new", text)
                 self.assertIn("ONLY_ACCEPTS_NEW", text)
@@ -72,17 +81,17 @@ class ArchitectureTuiTest(unittest.TestCase):
                 self.assertNotIn("新建", text)
 
     def test_views_fit_an_eighty_column_terminal(self):
-        for language, path in ARCHITECTURES.items():
+        for language, (path, start_marker, end_marker) in ARCHITECTURES.items():
             with self.subTest(language=language):
-                lines = path.read_text(encoding="utf-8").splitlines()
+                lines = architecture_text(path, start_marker, end_marker).splitlines()
                 widest = max(display_width(line) for line in lines)
                 self.assertLessEqual(widest, 80)
                 self.assertFalse(any("\t" in line for line in lines))
 
     def test_views_do_not_embed_operator_specific_paths(self):
-        for language, path in ARCHITECTURES.items():
+        for language, (path, start_marker, end_marker) in ARCHITECTURES.items():
             with self.subTest(language=language):
-                text = path.read_text(encoding="utf-8")
+                text = architecture_text(path, start_marker, end_marker)
                 self.assertNotIn("/Users/", text)
                 self.assertNotIn("apiKey", text)
 
