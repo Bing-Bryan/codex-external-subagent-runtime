@@ -16,8 +16,8 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from bridge_runtime import (
-    BridgeRuntimeError,
+from runtime_contract import (
+    RuntimeContractError,
     MODEL_TRANSPORTS,
     agent_config_fingerprint,
     load_provider_registry,
@@ -39,7 +39,7 @@ def codex_home() -> Path:
 
 def parse_args() -> argparse.Namespace:
     home = codex_home()
-    runtime = home / "codex-external-subagent-bridge"
+    runtime = home / "codex-external-subagent-runtime"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--provider-id", required=True)
     parser.add_argument("--providers", type=Path, default=runtime / "providers.json")
@@ -55,7 +55,7 @@ def run() -> dict[str, Any]:
     home = codex_home()
     try:
         providers = load_provider_registry(args.providers)
-    except BridgeRuntimeError as exc:
+    except RuntimeContractError as exc:
         raise EvidenceError(exc.code) from exc
     matches = [item for item in providers if item["providerId"] == args.provider_id]
     if len(matches) != 1:
@@ -69,7 +69,7 @@ def run() -> dict[str, Any]:
             delivery = "mcp-tool"
             fingerprint = mcp_config_fingerprint(home, provider["mcpServer"])
         existing = load_smoke_evidence(args.evidence)
-    except BridgeRuntimeError as exc:
+    except RuntimeContractError as exc:
         raise EvidenceError(exc.code) from exc
 
     existing[args.provider_id] = {

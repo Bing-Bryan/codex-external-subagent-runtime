@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Small JSONL app-server double used only by bridge integration tests."""
+"""Small JSONL app-server double used only by runtime integration tests."""
 
 from __future__ import annotations
 

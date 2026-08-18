@@ -4,8 +4,7 @@ from pathlib import Path
 
 
 SCRIPT = (
-    Path(__file__).resolve().parents[3]
-    / "codex-external-subagent-bridge"
+    Path(__file__).resolve().parents[1]
     / "scripts"
     / "pinned_entry.py"
 )

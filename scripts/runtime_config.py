@@ -304,7 +304,7 @@ def apply_plan(home: Path, intent: Path, expected_sha: str, approved: bool) -> d
     except OSError as exc:
         raise ConfigError("codex_home_unavailable") from exc
 
-    with ApplyLock(home / ".codex-external-subagent-bridge-config.lock"):
+    with ApplyLock(home / ".codex-external-subagent-runtime-config.lock"):
         public, material = build_plan(home, intent)
         if public["planSha"] != expected_sha:
             raise ConfigError("config_conflict")
@@ -320,11 +320,11 @@ def apply_plan(home: Path, intent: Path, expected_sha: str, approved: bool) -> d
             }
 
         backup_base = home / "backups"
-        bridge_backup_base = backup_base / "codex-external-subagent-bridge"
-        if backup_base.is_symlink() or bridge_backup_base.is_symlink():
+        runtime_backup_base = backup_base / "codex-external-subagent-runtime"
+        if backup_base.is_symlink() or runtime_backup_base.is_symlink():
             raise ConfigError("config_backup_target_invalid")
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-        backup_root = bridge_backup_base / timestamp
+        backup_root = runtime_backup_base / timestamp
         staged: list[tuple[Path, Path, int]] = []
         try:
             for item in material:

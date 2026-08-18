@@ -5,10 +5,10 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[3]
-SCRIPT = ROOT / "codex-external-subagent-bridge" / "scripts" / "validate_registry.py"
-PROJECTS = ROOT / "codex-external-subagent-bridge" / "references" / "projects.example.json"
-PROVIDERS = ROOT / "codex-external-subagent-bridge" / "references" / "providers.example.json"
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "validate_registry.py"
+PROJECTS = ROOT / "examples" / "projects.example.json"
+PROVIDERS = ROOT / "examples" / "providers.example.json"
 
 
 class RegistryCliTest(unittest.TestCase):

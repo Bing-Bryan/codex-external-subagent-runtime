@@ -8,12 +8,11 @@ from pathlib import Path
 
 
 MODULE_PATH = (
-    Path(__file__).resolve().parents[3]
-    / "codex-external-subagent-bridge"
+    Path(__file__).resolve().parents[1]
     / "scripts"
-    / "bridge_runtime.py"
+    / "runtime_contract.py"
 )
-SPEC = importlib.util.spec_from_file_location("bridge_runtime", MODULE_PATH)
+SPEC = importlib.util.spec_from_file_location("runtime_contract", MODULE_PATH)
 runtime = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(runtime)
@@ -150,7 +149,7 @@ command = "safe-wrapper"
         shutil.copy2(self.home / "agents" / "worker.toml", outside / "worker.toml")
         shutil.rmtree(self.home / "agents")
         os.symlink(outside, self.home / "agents")
-        with self.assertRaises(runtime.BridgeRuntimeError) as ctx:
+        with self.assertRaises(runtime.RuntimeContractError) as ctx:
             runtime.agent_config_fingerprint(self.home, "worker")
         self.assertEqual(ctx.exception.code, "route_config_invalid")
 

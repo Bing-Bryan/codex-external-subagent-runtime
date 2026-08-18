@@ -3,12 +3,11 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[3]
-SKILL = ROOT / "codex-external-subagent-bridge"
 ARCHITECTURES = {
-    "zh-CN": SKILL / "references" / "architecture.zh-CN.txt",
-    "en": SKILL / "references" / "architecture.en.txt",
+    "zh-CN": Path(__file__).resolve().parents[1] / "docs" / "architecture.zh-CN.txt",
+    "en": Path(__file__).resolve().parents[1] / "docs" / "architecture.en.txt",
 }
+README = Path(__file__).resolve().parents[1] / "README.md"
 
 
 def display_width(line):
@@ -21,10 +20,11 @@ def display_width(line):
 
 
 class ArchitectureTuiTest(unittest.TestCase):
-    def test_skill_links_both_terminal_views(self):
-        skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    def test_readme_links_both_terminal_views(self):
+        readme = README.read_text(encoding="utf-8")
         for path in ARCHITECTURES.values():
-            self.assertIn(f"references/{path.name}", skill)
+            self.assertIn(f"docs/{path.name}", readme)
+        self.assertIn("standalone runtime repository", readme)
 
     def test_views_have_matching_journey_and_operation_topology(self):
         required = (

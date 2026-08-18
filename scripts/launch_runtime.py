@@ -22,7 +22,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from bridge_runtime import BridgeRuntimeError, build_runtime_allowlist, developer_instructions
+from runtime_contract import RuntimeContractError, build_runtime_allowlist, developer_instructions
 
 
 LUNA_MODEL = "gpt-5.6-luna"
@@ -34,7 +34,7 @@ DEFAULT_THREAD_TIMEOUT = 60
 DEFAULT_SETTINGS_TIMEOUT = 30
 DEFAULT_READ_TIMEOUT = 30
 MAX_PHASE_TIMEOUT = 180
-RUNTIME_NAME = "codex-external-subagent-bridge"
+RUNTIME_NAME = "codex-external-subagent-runtime"
 
 
 class LauncherError(RuntimeError):
@@ -306,7 +306,7 @@ class AppServer:
         threading.Thread(target=self._read_stdout, daemon=True).start()
         self.request(
             "initialize",
-            {"clientInfo": {"name": RUNTIME_NAME, "title": "Codex External Subagent Bridge", "version": "2.0.0"}},
+            {"clientInfo": {"name": RUNTIME_NAME, "title": "Codex External Subagent Runtime", "version": "2.0.0"}},
             timeout,
             "initialize_failed",
             "startup_timeout",
@@ -472,7 +472,7 @@ def load_route_policy(home: Path, providers_path: Path, evidence_path: Path) -> 
         return {"allowed": [], "rejected": []}
     try:
         return build_runtime_allowlist(home, providers_path, evidence_path)
-    except BridgeRuntimeError as exc:
+    except RuntimeContractError as exc:
         raise LauncherError(exc.code) from exc
 
 

@@ -17,7 +17,7 @@ ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
-class BridgeRuntimeError(ValueError):
+class RuntimeContractError(ValueError):
     def __init__(self, code: str):
         super().__init__(code)
         self.code = code
@@ -25,36 +25,36 @@ class BridgeRuntimeError(ValueError):
 
 def _require_text(value: Any, code: str, maximum: int = 240) -> str:
     if not isinstance(value, str):
-        raise BridgeRuntimeError(code)
+        raise RuntimeContractError(code)
     text = value.strip()
     if not text or len(text) > maximum or any(ord(char) < 32 for char in text):
-        raise BridgeRuntimeError(code)
+        raise RuntimeContractError(code)
     return text
 
 
 def _read_regular(path: Path, code: str, maximum: int = 1_000_000) -> bytes:
     try:
         if path.is_symlink() or not path.resolve(strict=True).is_file():
-            raise BridgeRuntimeError(code)
+            raise RuntimeContractError(code)
         data = path.read_bytes()
-    except BridgeRuntimeError:
+    except RuntimeContractError:
         raise
     except OSError as exc:
-        raise BridgeRuntimeError(code) from exc
+        raise RuntimeContractError(code) from exc
     if len(data) > maximum:
-        raise BridgeRuntimeError(code)
+        raise RuntimeContractError(code)
     return data
 
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
         value = json.loads(_read_regular(path, code).decode("utf-8"))
-    except BridgeRuntimeError:
+    except RuntimeContractError:
         raise
     except (UnicodeError, json.JSONDecodeError) as exc:
-        raise BridgeRuntimeError(code) from exc
+        raise RuntimeContractError(code) from exc
     if not isinstance(value, dict):
-        raise BridgeRuntimeError(code)
+        raise RuntimeContractError(code)
     return value
 
 
@@ -63,7 +63,7 @@ def _decode_toml_text(path: Path, code: str) -> tuple[bytes, str]:
     try:
         return raw, raw.decode("utf-8")
     except UnicodeError as exc:
-        raise BridgeRuntimeError(code) from exc
+        raise RuntimeContractError(code) from exc
 
 
 def _simple_assignments(text: str, section_name: str) -> dict[str, str]:
@@ -80,7 +80,7 @@ def _simple_assignments(text: str, section_name: str) -> dict[str, str]:
             if match:
                 key = match.group(1)
                 if key in result:
-                    raise BridgeRuntimeError("route_config_invalid")
+                    raise RuntimeContractError("route_config_invalid")
                 result[key] = match.group(3)
     return result
 
@@ -96,7 +96,7 @@ def _matching_table_text(text: str, table_prefix: str) -> str:
         if active:
             chunks.append(raw)
     if not chunks:
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     return "".join(chunks)
 
 
@@ -116,43 +116,43 @@ def _validate_base_url(value: Any) -> None:
         or parsed.query
         or parsed.fragment
     ):
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     if parsed.scheme == "http" and host not in {"127.0.0.1", "localhost", "::1"}:
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
 
 
 def load_provider_registry(path: Path) -> list[dict[str, Any]]:
     data = _load_json(path, "providers_registry_unreadable")
     if set(data) != {"version", "providers"} or data.get("version") != 2:
-        raise BridgeRuntimeError("providers_registry_schema_invalid")
+        raise RuntimeContractError("providers_registry_schema_invalid")
     providers = data.get("providers")
     if not isinstance(providers, list):
-        raise BridgeRuntimeError("providers_registry_schema_invalid")
+        raise RuntimeContractError("providers_registry_schema_invalid")
 
     seen: set[str] = set()
     validated: list[dict[str, Any]] = []
     common = {"providerId", "label", "transport", "enabled", "notes"}
     for item in providers:
         if not isinstance(item, dict):
-            raise BridgeRuntimeError("providers_registry_schema_invalid")
+            raise RuntimeContractError("providers_registry_schema_invalid")
         provider_id = _require_text(item.get("providerId"), "provider_id_invalid", 80)
         if not ID_PATTERN.fullmatch(provider_id) or provider_id in seen:
-            raise BridgeRuntimeError("provider_id_invalid")
+            raise RuntimeContractError("provider_id_invalid")
         seen.add(provider_id)
         _require_text(item.get("label"), "provider_label_invalid", 120)
         _require_text(item.get("notes"), "provider_notes_invalid", 600)
         transport = _require_text(item.get("transport"), "provider_transport_invalid", 64)
         if transport not in TRANSPORTS or not isinstance(item.get("enabled"), bool):
-            raise BridgeRuntimeError("providers_registry_schema_invalid")
+            raise RuntimeContractError("providers_registry_schema_invalid")
         if transport in MODEL_TRANSPORTS:
             if set(item) != common | {"agentType"}:
-                raise BridgeRuntimeError("providers_registry_schema_invalid")
+                raise RuntimeContractError("providers_registry_schema_invalid")
             agent_type = _require_text(item.get("agentType"), "provider_agent_invalid", 120)
             if not NAME_PATTERN.fullmatch(agent_type):
-                raise BridgeRuntimeError("provider_agent_invalid")
+                raise RuntimeContractError("provider_agent_invalid")
         else:
             if set(item) != common | {"mcpServer", "toolName", "readOnly"}:
-                raise BridgeRuntimeError("providers_registry_schema_invalid")
+                raise RuntimeContractError("providers_registry_schema_invalid")
             server = _require_text(item.get("mcpServer"), "provider_tool_invalid", 160)
             tool = _require_text(item.get("toolName"), "provider_tool_invalid", 160)
             if (
@@ -160,7 +160,7 @@ def load_provider_registry(path: Path) -> list[dict[str, Any]]:
                 or not NAME_PATTERN.fullmatch(tool)
                 or item.get("readOnly") is not True
             ):
-                raise BridgeRuntimeError("provider_tool_invalid")
+                raise RuntimeContractError("provider_tool_invalid")
         validated.append(item)
     return validated
 
@@ -170,10 +170,10 @@ def load_smoke_evidence(path: Path) -> dict[str, dict[str, Any]]:
         return {}
     data = _load_json(path, "smoke_evidence_unreadable")
     if set(data) != {"version", "evidence"} or data.get("version") != 1:
-        raise BridgeRuntimeError("smoke_evidence_schema_invalid")
+        raise RuntimeContractError("smoke_evidence_schema_invalid")
     items = data.get("evidence")
     if not isinstance(items, list):
-        raise BridgeRuntimeError("smoke_evidence_schema_invalid")
+        raise RuntimeContractError("smoke_evidence_schema_invalid")
     result: dict[str, dict[str, Any]] = {}
     expected = {
         "providerId",
@@ -184,20 +184,20 @@ def load_smoke_evidence(path: Path) -> dict[str, dict[str, Any]]:
     }
     for item in items:
         if not isinstance(item, dict) or set(item) != expected:
-            raise BridgeRuntimeError("smoke_evidence_schema_invalid")
+            raise RuntimeContractError("smoke_evidence_schema_invalid")
         provider_id = _require_text(item.get("providerId"), "smoke_evidence_schema_invalid", 80)
         if provider_id in result:
-            raise BridgeRuntimeError("smoke_evidence_duplicate")
+            raise RuntimeContractError("smoke_evidence_duplicate")
         if item.get("status") != "passed" or item.get("deliveryKind") not in {
             "v1-child",
             "mcp-tool",
         }:
-            raise BridgeRuntimeError("smoke_evidence_schema_invalid")
+            raise RuntimeContractError("smoke_evidence_schema_invalid")
         fingerprint = _require_text(
             item.get("configFingerprint"), "smoke_evidence_schema_invalid", 80
         )
         if re.fullmatch(r"sha256:[0-9a-f]{64}", fingerprint) is None:
-            raise BridgeRuntimeError("smoke_evidence_schema_invalid")
+            raise RuntimeContractError("smoke_evidence_schema_invalid")
         _require_text(item.get("testedAt"), "smoke_evidence_schema_invalid", 64)
         result[provider_id] = item
     return result
@@ -205,49 +205,49 @@ def load_smoke_evidence(path: Path) -> dict[str, dict[str, Any]]:
 
 def agent_config_fingerprint(home: Path, agent_type: str) -> str:
     if not NAME_PATTERN.fullmatch(agent_type):
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     agents_dir = home / "agents"
     try:
         if agents_dir.is_symlink() or not agents_dir.resolve(strict=True).is_dir():
-            raise BridgeRuntimeError("route_config_invalid")
-    except BridgeRuntimeError:
+            raise RuntimeContractError("route_config_invalid")
+    except RuntimeContractError:
         raise
     except OSError as exc:
-        raise BridgeRuntimeError("route_config_invalid") from exc
+        raise RuntimeContractError("route_config_invalid") from exc
     path = agents_dir / f"{agent_type}.toml"
     try:
         if path.resolve(strict=True).parent != agents_dir.resolve(strict=True):
-            raise BridgeRuntimeError("route_config_invalid")
-    except BridgeRuntimeError:
+            raise RuntimeContractError("route_config_invalid")
+    except RuntimeContractError:
         raise
     except OSError as exc:
-        raise BridgeRuntimeError("route_config_invalid") from exc
+        raise RuntimeContractError("route_config_invalid") from exc
     raw, text = _decode_toml_text(path, "route_config_invalid")
     top = _simple_assignments(text, "")
     if top.get("name") != agent_type:
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     model = top.get("model")
     provider_name = top.get("model_provider")
     if not model or not provider_name or NAME_PATTERN.fullmatch(provider_name) is None:
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     provider = _simple_assignments(text, f"model_providers.{provider_name}")
     if provider.get("wire_api") != "responses":
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     _validate_base_url(provider.get("base_url"))
     return _sha256(raw)
 
 
 def mcp_config_fingerprint(home: Path, server_name: str) -> str:
     if not NAME_PATTERN.fullmatch(server_name):
-        raise BridgeRuntimeError("route_config_invalid")
+        raise RuntimeContractError("route_config_invalid")
     config_path = home / "config.toml"
     try:
         if config_path.resolve(strict=True).parent != home.resolve(strict=True):
-            raise BridgeRuntimeError("route_config_invalid")
-    except BridgeRuntimeError:
+            raise RuntimeContractError("route_config_invalid")
+    except RuntimeContractError:
         raise
     except OSError as exc:
-        raise BridgeRuntimeError("route_config_invalid") from exc
+        raise RuntimeContractError("route_config_invalid") from exc
     _, text = _decode_toml_text(config_path, "route_config_invalid")
     selected = _matching_table_text(text, f"mcp_servers.{server_name}")
     return _sha256(selected.encode("utf-8"))
@@ -279,7 +279,7 @@ def build_runtime_allowlist(
                 fingerprint = agent_config_fingerprint(home, item["agentType"])
             else:
                 fingerprint = mcp_config_fingerprint(home, item["mcpServer"])
-        except BridgeRuntimeError:
+        except RuntimeContractError:
             rejected.append({"providerId": provider_id, "reason": "route_config_invalid"})
             continue
         if proof["configFingerprint"] != fingerprint:
@@ -313,7 +313,7 @@ def build_runtime_allowlist(
 def developer_instructions(allowed: list[dict[str, Any]]) -> str:
     manifest = json.dumps(allowed, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return (
-        "Codex External Subagent Bridge policy. The following JSON is the complete "
+        "Codex External Subagent Runtime policy. The following JSON is the complete "
         f"external-route allowlist for this task: {manifest}. Use only these routes. "
         "A v1-child route names an existing agentType; an mcp-tool route names one "
         "bounded tool and is not a child model. Do not infer or add providers, change "

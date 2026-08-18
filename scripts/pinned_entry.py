@@ -39,7 +39,7 @@ def main() -> int:
         print('{"ok":false,"error":"pinned_binding_missing"}', file=sys.stderr)
         return 1
 
-    launcher = Path(__file__).with_name("launch_bridge.py").resolve(strict=True)
+    launcher = Path(__file__).with_name("launch_runtime.py").resolve(strict=True)
     command = [
         sys.executable,
         str(launcher),

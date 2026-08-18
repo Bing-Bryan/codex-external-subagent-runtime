@@ -8,10 +8,9 @@ from pathlib import Path
 
 
 MODULE_PATH = (
-    Path(__file__).resolve().parents[3]
-    / "codex-external-subagent-bridge"
+    Path(__file__).resolve().parents[1]
     / "scripts"
-    / "launch_bridge.py"
+    / "launch_runtime.py"
 )
 SPEC = importlib.util.spec_from_file_location("launch_v1_sol", MODULE_PATH)
 launcher = importlib.util.module_from_spec(SPEC)
@@ -80,7 +79,7 @@ class NoTurnAppServerIntegrationTest(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.home = self.root / "codex-home"
         self.project = self.root / "project"
-        self.runtime = self.home / "codex-external-subagent-bridge"
+        self.runtime = self.home / "codex-external-subagent-runtime"
         self.home.mkdir()
         self.project.mkdir()
         self.runtime.mkdir()

@@ -4,7 +4,7 @@ CODEX EXTERNAL SUBAGENT BRIDGE :: TUI 流程图（简体中文）
 ┌─ VIEW A / 用户启动旅程（用户可见）─────────────────────────────────────
 │
 │  前置状态（不属于旅程）
-│  Skill 已安装 | 置顶入口已绑定项目 | Provider 由用户自行配置
+│  Runtime 已安装 | 置顶入口已绑定项目 | Provider 由用户自行配置
 │
 │  [A] 用户进入项目的置顶入口
 │       页面仅显示 ENTRY_READY
@@ -14,7 +14,7 @@ CODEX EXTERNAL SUBAGENT BRIDGE :: TUI 流程图（简体中文）
 │       其他输入只返回：ONLY_ACCEPTS_NEW
 │                         │
 │                         ▼
-│  [C] Bridge 自动校验
+│  [C] Runtime 自动校验
 │       用户无需填写 projectId、cwd、Provider 或模型
 │                         │
 │              ┌──────────┴──────────┐
@@ -30,7 +30,7 @@ CODEX EXTERNAL SUBAGENT BRIDGE :: TUI 流程图（简体中文）
 │
 └─ 到达状态：用户面对 Sol Ultra；Luna 没有处理真实需求
 
-┌─ VIEW B / Skill 内部操作逻辑（一次精确 new）────────────────────────────
+┌─ VIEW B / Runtime 内部操作逻辑（一次精确 new）────────────────────────────
 │
 │  [1] 确定性入口门
 │      trim(input) == "new"；projectId + canonical cwd 由入口固定
@@ -67,6 +67,6 @@ CODEX EXTERNAL SUBAGENT BRIDGE :: TUI 流程图（简体中文）
 │  TEMP       launch.lock；退出时删除
 │  NEVER      不改全局配置、Agent TOML、MCP、Keychain、CC Switch、凭据
 │
-│  安装/同步只放置 Skill 文件；不属于上面的一次 new 流程。
+│  安装仅放置 Runtime 文件；不属于上面的一次 new 流程。
 │  smoke recorder 与显式 config apply 是独立操作，launch 永不调用它们。
 └─────────────────────────────────────────────────────────────────────────

@@ -6,13 +6,8 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[3]
-SCRIPT = (
-    ROOT
-    / "codex-external-subagent-bridge"
-    / "scripts"
-    / "record_smoke_evidence.py"
-)
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "record_smoke_evidence.py"
 
 
 class SmokeEvidenceRecorderTest(unittest.TestCase):
@@ -30,7 +25,7 @@ wire_api = "responses"
 """,
             encoding="utf-8",
         )
-        self.runtime = self.home / "codex-external-subagent-bridge"
+        self.runtime = self.home / "codex-external-subagent-runtime"
         self.runtime.mkdir()
         (self.runtime / "providers.json").write_text(
             json.dumps(

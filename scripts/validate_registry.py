@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate bridge registries without exposing provider configuration values."""
+"""Validate runtime registries without exposing provider configuration values."""
 
 from __future__ import annotations
 
@@ -16,8 +16,8 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from bridge_runtime import (
-    BridgeRuntimeError,
+from runtime_contract import (
+    RuntimeContractError,
     build_runtime_allowlist,
     load_provider_registry,
     load_smoke_evidence,
@@ -106,7 +106,7 @@ def validate_projects(path: Path, require_existing_cwds: bool = True) -> dict[st
 def validate_providers(path: Path) -> dict[str, Any]:
     try:
         providers = load_provider_registry(path)
-    except BridgeRuntimeError as exc:
+    except RuntimeContractError as exc:
         raise RegistryError(exc.code) from exc
     counts = Counter(item["transport"] for item in providers)
     return {
@@ -119,7 +119,7 @@ def validate_providers(path: Path) -> dict[str, Any]:
 
 def parse_args() -> argparse.Namespace:
     home = codex_home()
-    runtime = home / "codex-external-subagent-bridge"
+    runtime = home / "codex-external-subagent-runtime"
     parser = JsonArgumentParser(description=__doc__)
     parser.add_argument("--projects", type=Path, default=runtime / "projects.json")
     parser.add_argument("--providers", type=Path, default=runtime / "providers.json")
@@ -137,7 +137,7 @@ def run() -> dict[str, Any]:
     if args.smoke_evidence.exists():
         try:
             loaded = load_smoke_evidence(args.smoke_evidence)
-        except BridgeRuntimeError as exc:
+        except RuntimeContractError as exc:
             raise RegistryError(exc.code) from exc
         evidence = {"version": 1, "count": len(loaded)}
     runtime: dict[str, Any] | None = None
@@ -146,7 +146,7 @@ def run() -> dict[str, Any]:
             evaluated = build_runtime_allowlist(
                 codex_home(), args.providers, args.smoke_evidence
             )
-        except BridgeRuntimeError as exc:
+        except RuntimeContractError as exc:
             raise RegistryError(exc.code) from exc
         runtime = {
             "allowed": len(evaluated["allowed"]),

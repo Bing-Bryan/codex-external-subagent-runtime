@@ -1,16 +1,28 @@
-name: Codex External Subagent Bridge
+name: Codex External Subagent Runtime CI
 
 on:
   pull_request:
     paths:
-      - "codex-external-subagent-bridge/**"
-      - ".github/tests/codex-external-subagent-bridge/**"
-      - ".github/workflows/codex-external-subagent-bridge.yml"
+      - "scripts/**"
+      - "docs/**"
+      - "examples/**"
+      - "templates/**"
+      - "tests/**"
+      - ".github/workflows/ci.yml"
+      - "README.md"
+      - "README.zh-CN.md"
+      - "MIGRATION.md"
   push:
     paths:
-      - "codex-external-subagent-bridge/**"
-      - ".github/tests/codex-external-subagent-bridge/**"
-      - ".github/workflows/codex-external-subagent-bridge.yml"
+      - "scripts/**"
+      - "docs/**"
+      - "examples/**"
+      - "templates/**"
+      - "tests/**"
+      - ".github/workflows/ci.yml"
+      - "README.md"
+      - "README.zh-CN.md"
+      - "MIGRATION.md"
 
 permissions:
   contents: read
@@ -28,6 +40,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Compile
-        run: python -m compileall -q codex-external-subagent-bridge
+        run: python -m compileall -q scripts tests
       - name: Test
-        run: python -m unittest discover -s .github/tests/codex-external-subagent-bridge -p 'test_*.py'
+        run: python -m unittest discover -s tests -p 'test_*.py'

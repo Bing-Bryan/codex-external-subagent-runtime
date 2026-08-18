@@ -1,6 +1,6 @@
 # Provider route contract
 
-The Bridge does not maintain a provider catalog. Each operator may define any
+The Runtime does not maintain a provider catalog. Each operator may define any
 provider that satisfies one of the supported transport contracts and passes a
 real local smoke test.
 
@@ -20,7 +20,7 @@ delivery.
 
 The public registry references existing named agents and MCP servers; it does
 not duplicate endpoints, models, auth commands, environment-variable names, or
-credentials. At launch, the Bridge reads only enough Codex-owned configuration
+credentials. At launch, the Runtime reads only enough Codex-owned configuration
 to validate the route and compute its fingerprint.
 
 The sanitized task allowlist contains only:
@@ -41,7 +41,7 @@ A route is usable only when:
 3. The current relevant config fingerprint exactly matches the smoke-test
    fingerprint.
 
-Config drift disables the route. The Bridge does not repair the file, rerun a
+Config drift disables the route. The Runtime does not repair the file, rerun a
 smoke test, choose a different provider, or fall back to another route.
 
 No registry ordering means priority. Sol chooses among suitable allowlisted
@@ -90,13 +90,13 @@ These are provenance notes, not built-in providers and not enablement evidence:
 | Kimi | V1 model child | Completed only while the author's CC Switch route remained fixed to Kimi. |
 | Grok | Read-only CLI/MCP tool | Completed as a bounded tool, not as a model child. Private wrapper and credentials are not shipped. |
 
-The Bridge makes no claim about providers not listed above. They are neither
+The Runtime makes no claim about providers not listed above. They are neither
 forbidden nor supported by author evidence: the user's local contract and
 smoke result decide.
 
 ## Configuration writes
 
-`bridge_config.py plan` is read-only and reports a redacted structural
+`runtime_config.py plan` is read-only and reports a redacted structural
 difference. `apply` is a separate, explicit whole-file operation requiring a
 fresh plan SHA and `--allow-global-config-write`. Launch and smoke recording
 never import or invoke apply.

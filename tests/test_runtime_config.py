@@ -7,10 +7,9 @@ from pathlib import Path
 
 
 SCRIPT = (
-    Path(__file__).resolve().parents[3]
-    / "codex-external-subagent-bridge"
+    Path(__file__).resolve().parents[1]
     / "scripts"
-    / "bridge_config.py"
+    / "runtime_config.py"
 )
 
 
