@@ -144,7 +144,8 @@ CODEX EXTERNAL SUBAGENT RUNTIME :: TUI 流程图（简体中文）
 │      读取已有 named-agent / MCP 元数据、registry、smoke evidence
 │      enabled + smoke passed + fingerprint match -> 脱敏 allowlist
 │      单路线失败只会被拒绝；不修复、不切换、不 silent fallback
-│                         │  固定 developerInstructions
+│                         │
+│                         ▼  固定 developerInstructions
 │  [4] App Server / 零 bootstrap turn
 │      initialize -> model/list
 │      -> thread/start(gpt-5.6-luna, V1, allowlist)

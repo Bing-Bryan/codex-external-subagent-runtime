@@ -162,7 +162,8 @@ SCOPE  One post-install task launch | No installation flow | No runtime routing
 │      Read existing named-agent / MCP metadata, registry, smoke evidence
 │      enabled + smoke passed + fingerprint match -> sanitized allowlist
 │      Reject a failed route; no repair, switching, or silent fallback
-│                         │  fixed developerInstructions
+│                         │
+│                         ▼  fixed developerInstructions
 │  [4] App Server / zero bootstrap turns
 │      initialize -> model/list
 │      -> thread/start(gpt-5.6-luna, V1, allowlist)
