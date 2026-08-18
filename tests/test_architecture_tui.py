@@ -29,11 +29,15 @@ def display_width(line):
 
 class ArchitectureTuiTest(unittest.TestCase):
     def test_readmes_embed_both_terminal_views(self):
+        image = ROOT / "docs" / "runtime-overview.png"
+        self.assertTrue(image.is_file())
         self.assertIn("standalone runtime repository", ARCHITECTURES["en"][0].read_text(encoding="utf-8"))
         self.assertIn("独立仓库", ARCHITECTURES["zh-CN"][0].read_text(encoding="utf-8"))
         for path, start_marker, end_marker in ARCHITECTURES.values():
-            self.assertIn(start_marker, path.read_text(encoding="utf-8"))
-            self.assertIn(end_marker, path.read_text(encoding="utf-8"))
+            readme = path.read_text(encoding="utf-8")
+            self.assertIn("(docs/runtime-overview.png)", readme)
+            self.assertIn(start_marker, readme)
+            self.assertIn(end_marker, readme)
 
     def test_views_have_matching_journey_and_operation_topology(self):
         required = (

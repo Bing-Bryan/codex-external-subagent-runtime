@@ -2,6 +2,8 @@
 
 [简体中文](README.zh-CN.md)
 
+![Codex External Subagent Runtime overview](docs/runtime-overview.png)
+
 Enable GPT and external models such as Kimi and DeepSeek to collaborate as
 gated subagents in the same Codex task, without requiring native V2
 cross-provider child support. Grok Build/CLI integrations stay behind the same
