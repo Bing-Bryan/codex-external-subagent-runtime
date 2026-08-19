@@ -66,7 +66,7 @@ reads credential values or repairs, replaces, or switches configuration.
 The App Server sequence is:
 
 ```text
-initialize
+initialize(capabilities.experimentalApi=true)
 model/list
 thread/start(model=gpt-5.6-luna, V1, developerInstructions=allowlist)
 thread/settings/update(model=gpt-5.6-sol, effort=ultra)
@@ -77,6 +77,12 @@ There is no Luna prompt, Sol handoff prompt, or `turn/start`. Success requires
 V1, zero bootstrap turns, Sol/Ultra settings verification, exact project
 binding, and a UUID thread ID. The Multi-Agent V1 boundary is deliberate; see
 the next section for the V2 limitation.
+
+`thread/settings/update` is an experimental App Server method. The launcher
+opts into the experimental API for this connection only; it does not write
+global Codex configuration. If the bundled CLI rejects the capability, the
+launch fails closed with a recoverable thread ID; it never adds a bootstrap
+turn or silently retries.
 
 After a successful launch, use Desktop controls to set a distinguishable
 title, locate the returned thread, verify project ID and canonical cwd, and
@@ -167,7 +173,7 @@ SCOPE  One post-install task launch | No installation flow | No runtime routing
 │                         │
 │                         ▼  fixed developerInstructions
 │  [4] App Server / zero bootstrap turns
-│      initialize -> model/list
+│      initialize(capabilities.experimentalApi=true) -> model/list
 │      -> thread/start(gpt-5.6-luna, V1, allowlist)
 │      -> thread/settings/update(gpt-5.6-sol, ultra)
 │      -> thread/read(includeTurns=true)

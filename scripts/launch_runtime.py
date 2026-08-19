@@ -38,10 +38,34 @@ RUNTIME_NAME = "codex-external-subagent-runtime"
 
 
 class LauncherError(RuntimeError):
-    def __init__(self, code: str, thread_id: str | None = None):
+    def __init__(
+        self,
+        code: str,
+        thread_id: str | None = None,
+        rpc_code: int | None = None,
+        rpc_reason: str | None = None,
+    ):
         super().__init__(code)
         self.code = code
         self.thread_id = thread_id
+        self.rpc_code = rpc_code
+        self.rpc_reason = rpc_reason
+
+
+def classify_rpc_error(error: Any) -> tuple[int | None, str]:
+    """Return safe structured diagnostics without exposing server payloads."""
+    if not isinstance(error, dict):
+        return None, "server_rejected"
+    code = error.get("code")
+    rpc_code = code if isinstance(code, int) and not isinstance(code, bool) else None
+    message = error.get("message")
+    if isinstance(message, str) and "requires experimentalApi capability" in message:
+        return rpc_code, "experimental_api_required"
+    if rpc_code == -32601:
+        return rpc_code, "method_not_found"
+    if rpc_code == -32602:
+        return rpc_code, "invalid_params"
+    return rpc_code, "server_rejected"
 
 
 class JsonArgumentParser(argparse.ArgumentParser):
@@ -306,7 +330,14 @@ class AppServer:
         threading.Thread(target=self._read_stdout, daemon=True).start()
         self.request(
             "initialize",
-            {"clientInfo": {"name": RUNTIME_NAME, "title": "Codex External Subagent Runtime", "version": "2.0.0"}},
+            {
+                "clientInfo": {
+                    "name": RUNTIME_NAME,
+                    "title": "Codex External Subagent Runtime",
+                    "version": "2.0.0",
+                },
+                "capabilities": {"experimentalApi": True},
+            },
             timeout,
             "initialize_failed",
             "startup_timeout",
@@ -375,7 +406,12 @@ class AppServer:
             message = self._read_message(deadline, timeout_code)
             if message.get("id") == request_id:
                 if "error" in message:
-                    raise LauncherError(error_code)
+                    rpc_code, rpc_reason = classify_rpc_error(message.get("error"))
+                    raise LauncherError(
+                        error_code,
+                        rpc_code=rpc_code,
+                        rpc_reason=rpc_reason,
+                    )
                 result = message.get("result")
                 if not isinstance(result, dict):
                     raise LauncherError(error_code)
@@ -587,6 +623,12 @@ def run() -> dict[str, Any]:
                 "settings_update_failed",
                 "settings_timeout",
             )
+            notification = server.matching_notification(
+                "thread/settings/updated",
+                lambda item: isinstance(item.get("params"), dict) and item["params"].get("threadId") == thread_id,
+                args.read_timeout_seconds,
+                "settings_verification_timeout",
+            )
             read = server.request(
                 "thread/read",
                 {"threadId": thread_id, "includeTurns": True},
@@ -606,12 +648,6 @@ def run() -> dict[str, Any]:
             ):
                 raise LauncherError("thread_read_invalid", thread_id)
 
-            notification = server.matching_notification(
-                "thread/settings/updated",
-                lambda item: isinstance(item.get("params"), dict) and item["params"].get("threadId") == thread_id,
-                args.read_timeout_seconds,
-                "settings_verification_timeout",
-            )
             params = notification.get("params")
             settings = params.get("threadSettings") if isinstance(params, dict) else None
             if (
@@ -657,6 +693,10 @@ def main() -> int:
         error: dict[str, Any] = {"ok": False, "error": exc.code}
         if exc.thread_id is not None:
             error["threadId"] = exc.thread_id
+        if exc.rpc_code is not None:
+            error["rpcCode"] = exc.rpc_code
+        if exc.rpc_reason is not None:
+            error["rpcReason"] = exc.rpc_reason
         print(json.dumps(error, separators=(",", ":")), file=sys.stderr)
         return 1
     except KeyboardInterrupt:

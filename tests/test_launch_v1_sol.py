@@ -163,6 +163,11 @@ class NoTurnAppServerIntegrationTest(unittest.TestCase):
         requests = [
             json.loads(line) for line in self.log.read_text(encoding="utf-8").splitlines()
         ]
+        initialized = next(item for item in requests if item.get("method") == "initialize")
+        self.assertEqual(
+            initialized["params"]["capabilities"],
+            {"experimentalApi": True},
+        )
         started = next(item for item in requests if item.get("method") == "thread/start")
         self.assertEqual(started["params"]["model"], "gpt-5.6-luna")
         self.assertFalse(started["params"]["allowProviderModelFallback"])
@@ -185,7 +190,36 @@ class NoTurnAppServerIntegrationTest(unittest.TestCase):
         payload = json.loads(completed.stderr)
         self.assertEqual(payload["error"], "settings_update_failed")
         self.assertEqual(payload["threadId"], self.project_id)
+        self.assertEqual(payload["rpcCode"], -32000)
+        self.assertEqual(payload["rpcReason"], "server_rejected")
+        self.assertNotIn('"message"', completed.stderr)
+        self.assertNotIn("must-not-leak", completed.stderr)
+        self.assertNotIn("must-not-leak", completed.stdout)
         self.assertFalse((self.runtime / "launch.lock").exists())
+
+    def test_experimental_api_gate_is_classified_without_raw_message(self):
+        completed = self.invoke("experimental_api_error")
+        self.assertNotEqual(completed.returncode, 0)
+        payload = json.loads(completed.stderr)
+        self.assertEqual(payload["error"], "settings_update_failed")
+        self.assertEqual(payload["threadId"], self.project_id)
+        self.assertEqual(payload["rpcCode"], -32600)
+        self.assertEqual(payload["rpcReason"], "experimental_api_required")
+        self.assertNotIn("requires experimentalApi capability", completed.stderr)
+
+    def test_method_not_found_is_classified(self):
+        completed = self.invoke("method_not_found")
+        self.assertNotEqual(completed.returncode, 0)
+        payload = json.loads(completed.stderr)
+        self.assertEqual(payload["rpcCode"], -32601)
+        self.assertEqual(payload["rpcReason"], "method_not_found")
+
+    def test_invalid_params_is_classified(self):
+        completed = self.invoke("invalid_params")
+        self.assertNotEqual(completed.returncode, 0)
+        payload = json.loads(completed.stderr)
+        self.assertEqual(payload["rpcCode"], -32602)
+        self.assertEqual(payload["rpcReason"], "invalid_params")
 
     def test_settings_phase_timeout_is_bounded(self):
         completed = self.invoke(

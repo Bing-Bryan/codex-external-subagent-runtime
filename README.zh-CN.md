@@ -59,7 +59,7 @@ python3 scripts/validate_registry.py
 App Server 顺序固定为：
 
 ```text
-initialize
+initialize(capabilities.experimentalApi=true)
 model/list
 thread/start(model=gpt-5.6-luna, V1, developerInstructions=allowlist)
 thread/settings/update(model=gpt-5.6-sol, effort=ultra)
@@ -83,6 +83,11 @@ thread/read(includeTurns=true)
 * App Server 请求固定 V1 feature set：先以 `gpt-5.6-luna` 启动任务，再对同一
   任务执行 `gpt-5.6-sol` + `ultra` 切换，并复核最终设置。本仓库没有 V2 专用的
   start、update、read 适配器。
+
+`thread/settings/update` 是实验性的 App Server 接口。Launcher 只为当前连接
+启用 experimental API，不会写入全局 Codex 配置。如果当前 bundled CLI 拒绝该
+能力，启动会 fail-closed 并返回可恢复的 thread ID；不会增加 bootstrap turn，
+也不会静默重试。
 * V2 的具体限制在于授权边界。当前 Codex Desktop V2 契约可以编排受支持的
   OpenAI 模型角色，但它的 child task 上下文、控制载荷以及 OpenAI 生成的产物，
   不能可靠地授权给第三方 Provider 消费。GPT 主任务不能安全地把同一份 V2 child
@@ -149,7 +154,7 @@ CODEX EXTERNAL SUBAGENT RUNTIME :: TUI 流程图（简体中文）
 │                         │
 │                         ▼  固定 developerInstructions
 │  [4] App Server / 零 bootstrap turn
-│      initialize -> model/list
+│      initialize(capabilities.experimentalApi=true) -> model/list
 │      -> thread/start(gpt-5.6-luna, V1, allowlist)
 │      -> thread/settings/update(gpt-5.6-sol, ultra)
 │      -> thread/read(includeTurns=true)
