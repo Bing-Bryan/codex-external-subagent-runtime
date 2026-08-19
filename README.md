@@ -90,9 +90,6 @@ navigate only after those checks pass.
 
 ## Why this runtime uses Multi-Agent V1
 
-V1 is the compatibility boundary for this implementation because the complete
-launch and verification chain has been implemented and tested only for V1:
-
 * Global preflight requires `[features] multi_agent = true` and
   `multi_agent_v2 = false`. When V2 is enabled, the runtime stops before the
   App Server with `global_v1_required`; it does not toggle the global flag or
