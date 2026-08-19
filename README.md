@@ -2,6 +2,14 @@
 
 [简体中文](README.zh-CN.md)
 
+> [!WARNING]
+> **Deprecated:** this pinned-entry launcher is retained only as a rollback
+> path. New installations should use
+> [`codex-project-agent-runtime`](https://github.com/Bing-Bryan/codex-project-agent-runtime),
+> which routes native Agents, Skills, and MCP tools inside ordinary project
+> tasks without creating a special Luna-to-Sol launcher task. Existing local
+> state and entrypoints are not removed automatically.
+
 ![Codex External Subagent Runtime overview](docs/runtime-overview.png)
 
 Enable GPT and external models such as Kimi and DeepSeek to collaborate as

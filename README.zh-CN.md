@@ -2,6 +2,12 @@
 
 [English](README.md)
 
+> [!WARNING]
+> **已弃用：**这个置顶入口启动器仅作为回滚路径保留。新安装请使用
+> [`codex-project-agent-runtime`](https://github.com/Bing-Bryan/codex-project-agent-runtime)：
+> 它直接在普通项目任务中路由原生 Agent、Skill 和 MCP 工具，不再创建特殊的
+> Luna → Sol 启动任务。现有本机状态和旧入口不会被自动删除。
+
 ![Codex External Subagent Runtime 架构概览](docs/runtime-overview.png)
 
 让 GPT 与 Kimi、DeepSeek 等外部模型在同一个 Codex 任务中作为受控子 Agent
