@@ -75,8 +75,6 @@ thread/read(includeTurns=true)
 
 ## 为什么当前方案基于 Multi-Agent V1
 
-选择 V1 是因为当前实现和测试只覆盖了完整的 V1 启动与验收链路：
-
 * 全局预检要求 `[features] multi_agent = true` 且
   `multi_agent_v2 = false`。启用 V2 时，Runtime 会在进入 App Server 前以
   `global_v1_required` 停止，不会切换全局开关，也不会静默降级。
