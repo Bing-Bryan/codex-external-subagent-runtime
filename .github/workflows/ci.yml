@@ -1,28 +1,8 @@
-name: Codex External Subagent Runtime CI
+name: CI
 
 on:
-  pull_request:
-    paths:
-      - "scripts/**"
-      - "docs/**"
-      - "examples/**"
-      - "templates/**"
-      - "tests/**"
-      - ".github/workflows/ci.yml"
-      - "README.md"
-      - "README.zh-CN.md"
-      - "MIGRATION.md"
   push:
-    paths:
-      - "scripts/**"
-      - "docs/**"
-      - "examples/**"
-      - "templates/**"
-      - "tests/**"
-      - ".github/workflows/ci.yml"
-      - "README.md"
-      - "README.zh-CN.md"
-      - "MIGRATION.md"
+  pull_request:
 
 permissions:
   contents: read
@@ -35,11 +15,15 @@ jobs:
       matrix:
         python-version: ["3.9", "3.11"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Compile
-        run: python -m compileall -q scripts tests
       - name: Test
-        run: python -m unittest discover -s tests -p 'test_*.py'
+        run: >-
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover
+          -s tests -p 'test_*.py' -v
+      - name: Compile
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m compileall -q scripts tests
+      - name: Check committed whitespace
+        run: git show --check --format= HEAD

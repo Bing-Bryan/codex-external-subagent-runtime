@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "id": "example-native-agent-v1",
+      "kind": "native-agent",
+      "target": "your_agent_type",
+      "capabilities": [
+        "code"
+      ],
+      "enabled": false,
+      "configFingerprint": "0000000000000000000000000000000000000000000000000000000000000000",
+      "smokeTtlSeconds": 604800,
+      "writeMode": "workspace",
+      "transport": "message"
+    },
+    {
+      "id": "example-native-agent-v2-external",
+      "kind": "native-agent",
+      "target": "your_external_agent_type",
+      "capabilities": [
+        "code-v2-external"
+      ],
+      "enabled": false,
+      "configFingerprint": "0000000000000000000000000000000000000000000000000000000000000000",
+      "smokeTtlSeconds": 604800,
+      "writeMode": "workspace",
+      "transport": "runtime-job"
+    },
+    {
+      "id": "example-specialist-skill",
+      "kind": "skill-tool",
+      "target": "$your-specialist-skill",
+      "capabilities": [
+        "domain-task"
+      ],
+      "enabled": false,
+      "configFingerprint": "0000000000000000000000000000000000000000000000000000000000000000",
+      "smokeTtlSeconds": 604800,
+      "writeMode": "read-only",
+      "transport": "direct"
+    },
+    {
+      "id": "example-mcp-tool",
+      "kind": "skill-tool",
+      "target": "mcp__example_server__lookup_item",
+      "capabilities": [
+        "lookup"
+      ],
+      "enabled": false,
+      "configFingerprint": "0000000000000000000000000000000000000000000000000000000000000000",
+      "smokeTtlSeconds": 604800,
+      "writeMode": "read-only",
+      "transport": "direct"
+    }
+  ]
+}

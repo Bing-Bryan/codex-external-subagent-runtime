@@ -1,8 +1,11 @@
-.DS_Store
 __pycache__/
 *.py[cod]
-.venv/
-projects.json
-providers.json
-smoke-evidence.json
-*.lock
+.DS_Store
+.coverage
+htmlcov/
+dist/
+build/
+.env
+.env.*
+*.pem
+*.key
