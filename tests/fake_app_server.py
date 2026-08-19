@@ -33,6 +33,7 @@ def main() -> int:
 
     mode = os.environ.get("FAKE_APP_MODE", "ok")
     cwd = ""
+    experimental_api = False
     for raw in sys.stdin:
         message = json.loads(raw)
         log(message)
@@ -42,6 +43,11 @@ def main() -> int:
         if request_id is None:
             continue
         if method == "initialize":
+            capabilities = params.get("capabilities")
+            experimental_api = (
+                isinstance(capabilities, dict)
+                and capabilities.get("experimentalApi") is True
+            )
             emit({"jsonrpc": "2.0", "id": request_id, "result": {}})
         elif method == "model/list":
             models = [
@@ -87,12 +93,46 @@ def main() -> int:
                 }
             )
         elif method == "thread/settings/update":
+            if mode == "experimental_api_error" or not experimental_api:
+                emit(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "error": {
+                            "code": -32600,
+                            "message": "thread/settings/update requires experimentalApi capability",
+                        },
+                    }
+                )
+                continue
+            if mode == "method_not_found":
+                emit(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "error": {"code": -32601, "message": "method unavailable"},
+                    }
+                )
+                continue
+            if mode == "invalid_params":
+                emit(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "error": {"code": -32602, "message": "invalid parameters"},
+                    }
+                )
+                continue
             if mode == "settings_error":
                 emit(
                     {
                         "jsonrpc": "2.0",
                         "id": request_id,
-                        "error": {"code": -32000, "message": "rejected"},
+                        "error": {
+                            "code": -32000,
+                            "message": "rejected",
+                            "data": {"secret": "must-not-leak"},
+                        },
                     }
                 )
                 continue

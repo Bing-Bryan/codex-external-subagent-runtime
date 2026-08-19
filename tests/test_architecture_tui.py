@@ -55,6 +55,7 @@ class ArchitectureTuiTest(unittest.TestCase):
             "[5]",
             "gpt-5.6-luna",
             "gpt-5.6-sol",
+            "experimentalApi=true",
             "bootstrapTurns = 0",
             "launch.lock",
         )
