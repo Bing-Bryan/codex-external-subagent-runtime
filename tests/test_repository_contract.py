@@ -23,28 +23,6 @@ class RepositoryContractTest(unittest.TestCase):
         self.assertIn("not an Agent Skill", read_text("README.md"))
         self.assertIn("不是 Agent Skill", read_text("README.zh-CN.md"))
 
-    def test_repository_replaces_the_legacy_pinned_launcher(self):
-        for relative_path in (
-            "scripts/launch_runtime.py",
-            "scripts/pinned_entry.py",
-            "templates/pinned-entry.developer-instructions.md",
-            "tests/test_launch_v1_sol.py",
-        ):
-            self.assertFalse(os.path.exists(os.path.join(ROOT, relative_path)))
-        migration = read_text("MIGRATION.md")
-        migration_flat = " ".join(migration.split())
-        self.assertIn("2b39a7f", migration)
-        self.assertIn("no automatic state conversion", migration)
-        self.assertIn(
-            "runtime_admin.py uninstall --allow-agents-write",
-            migration,
-        )
-        self.assertIn(
-            "~/.codex/backups/codex-project-agent-runtime/",
-            migration,
-        )
-        self.assertIn("restore the old pinned entries manually", migration_flat)
-
     def test_public_docs_explain_v1_v2_host_boundaries(self):
         english = " ".join(read_text("README.md").split())
         chinese = " ".join(read_text("README.zh-CN.md").split())
@@ -75,7 +53,6 @@ class RepositoryContractTest(unittest.TestCase):
             "tests/test_router_registry.py",
             "README.md",
             "README.zh-CN.md",
-            "MIGRATION.md",
         ):
             text = read_text(relative_path)
             self.assertIsNone(

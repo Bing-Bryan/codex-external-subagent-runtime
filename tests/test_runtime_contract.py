@@ -122,20 +122,5 @@ class RuntimeContractTest(unittest.TestCase):
         ):
             self.assertIn(phrase, text)
 
-    def test_old_launcher_protocol_is_absent(self):
-        text = self.read_template()
-        for forbidden in (
-            "ENTRY_READY",
-            "ONLY_ACCEPTS_NEW",
-            "TASK_READY",
-            "thread/start",
-            "thread/settings/update",
-            "Luna",
-            "Sol Ultra",
-            "置顶入口",
-        ):
-            self.assertNotIn(forbidden, text)
-
-
 if __name__ == "__main__":
     unittest.main()

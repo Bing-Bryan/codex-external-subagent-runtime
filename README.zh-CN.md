@@ -2,14 +2,9 @@
 
 [English](README.md)
 
-> [!IMPORTANT]
-> **1.0.0 起架构已变更。**本仓库现在提供常驻的项目内路由 Runtime，不再包含
-> 置顶 `new` 启动器，不创建特殊 Luna 任务，不执行 Luna → Sol 切换，也不调用
-> App Server。旧 Launcher 用户更新前请先阅读 [MIGRATION.md](MIGRATION.md)。
-
 这是一个在普通 Codex 项目任务中常驻生效的编排政策与确定性路由门禁，用于调用自定义原生 Agent、专项 Skill 和 MCP 工具。
 
-它**不是 Agent Skill**。用户不需要输入 `$...`、启动词，也不需要置顶启动器。Codex 从全局 `AGENTS.md` 加载受管政策；主 Agent 收到用户 prompt 后，自行判断直接完成，还是拆分成有边界的子任务。
+它**不是 Agent Skill**。Codex 从全局 `AGENTS.md` 加载受管政策，让 Runtime 在普通项目任务中保持可用；主 Agent 收到用户 prompt 后，自行判断直接完成，还是拆分成有边界的子任务。
 
 ```text
 用户 prompt
@@ -233,9 +228,6 @@ python3 scripts/runtime_admin.py uninstall --allow-agents-write
 ```
 
 卸载不会删除路线状态，也不会修改 Agent、Provider、MCP 或凭据配置。
-
-从旧置顶 Launcher 迁移的用户请按 [MIGRATION.md](MIGRATION.md) 操作。最后一个仅含
-Launcher 的版本仍可通过 commit `2b39a7f` 回滚。
 
 ## 验证
 

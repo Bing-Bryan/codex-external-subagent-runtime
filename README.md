@@ -2,21 +2,14 @@
 
 [简体中文](README.zh-CN.md)
 
-> [!IMPORTANT]
-> **Architecture changed in 1.0.0.** This repository now provides the
-> always-on project routing Runtime. It no longer ships the pinned `new`
-> launcher, creates a special Luna task, switches that task to Sol, or calls
-> the App Server. Existing launcher users should read
-> [MIGRATION.md](MIGRATION.md) before updating.
-
 An always-on orchestration policy and deterministic route gate for using custom
 native Agents, specialist Skills, and MCP tools inside ordinary Codex project
 tasks.
 
-This is **not an Agent Skill**. Users do not invoke it with `$...`, a keyword,
-or a pinned launcher. Codex loads a managed policy block from the global
-`AGENTS.md`; the main Agent then decides whether to handle each prompt directly
-or split it into bounded delegated work.
+This is **not an Agent Skill**. Codex loads a managed policy block from the
+global `AGENTS.md`, making the Runtime available in ordinary project tasks. The
+main Agent then decides whether to handle each prompt directly or split it into
+bounded delegated work.
 
 ```text
 user prompt
@@ -338,10 +331,6 @@ python3 scripts/runtime_admin.py uninstall --allow-agents-write
 
 Uninstall leaves route state, Agent configuration, Provider configuration, and
 credentials untouched.
-
-Users coming from the removed pinned launcher should follow
-[MIGRATION.md](MIGRATION.md). The last launcher-only revision remains available
-at commit `2b39a7f` for rollback.
 
 ## Verification
 
